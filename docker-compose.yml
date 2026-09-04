@@ -1,0 +1,43 @@
+services:
+  db:
+    image: postgres:16.2
+    container_name: postgres
+    hostname: ${DB_HOST}
+    environment:
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_DB: ${DB_NAME}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: pg_isready -U ${DB_USER} -d ${DB_NAME}
+      interval: 5s
+      retries: 5
+
+  migrations:
+    build:
+      context: .
+      dockerfile: src/Dockerfile
+    container_name: migrations
+    env_file: .env
+    depends_on:
+      db:
+        condition: service_healthy
+    command: >
+      sh -c "tortoise --config db.config.TORTOISE_ORM migrate"
+    restart: "no"
+
+  bot:
+    build:
+      context: .
+      dockerfile: src/Dockerfile
+    env_file: .env
+    depends_on:
+      db:
+        condition: service_healthy
+      migrations:
+        condition: service_completed_successfully
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
