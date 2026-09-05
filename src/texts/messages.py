@@ -25,14 +25,14 @@ PICK_MONTH = "Выбери месяц:"
 PICK_DAY = "Выбери день:"
 
 # today
-DAY_HEADER = "📅 <b>{day:02d}.{month:02d}.{year}</b> — {wd}\n🎓 Группа <b>{group}\n<b>"
+DAY_HEADER = "📅 <b>{day:02d}.{month:02d}.{year}</b> — {wd}\n🎓 Группа <b>{group}</b>"
 DAY_NO_LESSONS = "😴 <i>В этот день занятий нет</i>"
 DAY_SUMMARY = "📊 {count} {word}  ·  {t_start}–{t_end}"
 DAY_BTN_OFF = "{prefix} ({wd}) — выходной 😴"
 DAY_BTN = "{prefix} ({wd}) · {count} {word} · {t_start}–{t_end}"
 
 # now
-NOW_HEADER = "⏰ <b>Сейчас</b>  ·  {day:02d}.{month:02d} {wd}\n🎓 Группа <b>{group}\n<b>"
+NOW_HEADER = "⏰ <b>Сейчас</b>  ·  {day:02d}.{month:02d} {wd}\n🎓 Группа <b>{group}</b>"
 NOW_NO_LESSONS = "😴 <i>Сегодня пар нет</i>"
 NOW_NOT_STARTED = "☀️ Пары ещё не начались"
 NOW_BREAK = "☕️ Перерыв"
@@ -50,7 +50,7 @@ NOW_FOCUSED_ONGOING = "🟢 Сейчас идёт · осталось: <b>{time}
 NOW_FOCUSED_FINISHED = "✅ Закончилась"
 
 # month
-MONTH_HEADER = "📆 <b>{name} {year}</b>\n🎓 Группа <b>{group}\n<b>"
+MONTH_HEADER = "📆 <b>{name} {year}</b>\n🎓 Группа <b>{group}</b>"
 MONTH_SUMMARY = "📊 {days} уч. дн. · {lessons} {word}"
 
 # group selection
@@ -68,7 +68,7 @@ LESSON_DETAIL_TIME = "🕐 {t_start} – {t_end}"
 LESSON_DETAIL_SUBGROUP = "👥 {subgroup}"
 LESSON_DETAIL_TEACHER = "👤 {teachers}"
 LESSON_DETAIL_ROOM = "🚪 {room}"
-LESSON_DETAIL_FOOTER = "📅 {day:02d}.{month:02d}.{year} — {wd}  ·  🎓 {group}"
+LESSON_DETAIL_FOOTER = "📅 {day:02d}.{month:02d}.{year} — {wd}  ·  🎓 <b>{group}</b>"
 
 # stats
 STATS_HEADER = "📊 <b>Статистика</b>"
