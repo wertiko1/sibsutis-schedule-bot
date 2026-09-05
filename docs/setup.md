@@ -22,6 +22,7 @@ cp .env.example .env
 |---|---|
 | `SIBSUTIS_LOGIN` | Логин от sibsutis.ru |
 | `SIBSUTIS_PASSWORD` | Пароль от sibsutis.ru |
+| `SIBSUTIS_PROXY_URL` | SOCKS5-прокси с российским IP ([подробнее](proxy.md)) |
 | `BOT_TOKEN` | Токен Telegram-бота |
 | `BOT_ADMIN_IDS` | ID админов, например `[123456789,987654321]` |
 | `DB_HOST` | Хост PostgreSQL (в Docker: `postgres`) |
