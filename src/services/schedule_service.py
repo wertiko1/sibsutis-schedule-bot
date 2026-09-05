@@ -4,8 +4,8 @@ from sibsutis_schedule import AsyncSibsutisClient, MonthSchedule
 
 
 class ScheduleService:
-    def __init__(self, login: str, password: str) -> None:
-        self._client = AsyncSibsutisClient(login, password)
+    def __init__(self, login: str, password: str, proxy_url: str | None = None) -> None:
+        self._client = AsyncSibsutisClient(login, password, proxy_url=proxy_url)
         self._cache: dict[tuple[str, int], MonthSchedule] = {}
 
     async def get_month(self, group: str, month: int) -> MonthSchedule:

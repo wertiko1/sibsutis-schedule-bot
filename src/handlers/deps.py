@@ -12,4 +12,5 @@ def today() -> date:
 service = ScheduleService(
     login=settings.sibsutis.LOGIN,
     password=settings.sibsutis.PASSWORD,
+    proxy_url=settings.sibsutis.PROXY_URL,
 )

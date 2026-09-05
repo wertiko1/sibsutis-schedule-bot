@@ -2,6 +2,7 @@ import logging
 from types import TracebackType
 
 import aiohttp
+from aiohttp_socks import ProxyConnector
 
 from .auth import extract_auth_form, is_auth_failed
 from .models import MonthSchedule
@@ -14,16 +15,18 @@ logger: logging.Logger = logging.getLogger(__name__)
 class AsyncSibsutisClient:
     """Asynchronous client for fetching schedules from sibsutis.ru via aiohttp"""
 
-    def __init__(self, login: str, password: str) -> None:
+    def __init__(self, login: str, password: str, proxy_url: str | None = None) -> None:
         self._login: str = login
         self._password: str = password
+        self._proxy_url: str | None = proxy_url
         self._session: aiohttp.ClientSession | None = None
         self._authenticated: bool = False
 
     async def _ensure_session(self) -> aiohttp.ClientSession:
         """Return the existing session or create a new one if needed"""
         if self._session is None or self._session.closed:
-            self._session = aiohttp.ClientSession()
+            connector = ProxyConnector.from_url(self._proxy_url) if self._proxy_url else None
+            self._session = aiohttp.ClientSession(connector=connector)
         return self._session
 
     async def _authenticate(self, group: str) -> None:

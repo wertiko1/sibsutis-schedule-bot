@@ -13,10 +13,12 @@ logger: logging.Logger = logging.getLogger(__name__)
 class SibsutisClient:
     """Synchronous client for fetching schedules from sibsutis.ru"""
 
-    def __init__(self, login: str, password: str) -> None:
+    def __init__(self, login: str, password: str, proxy_url: str | None = None) -> None:
         self._login: str = login
         self._password: str = password
         self._session: requests.Session = requests.Session()
+        if proxy_url:
+            self._session.proxies = {"http": proxy_url, "https": proxy_url}
         self._authenticated: bool = False
 
     def _authenticate(self, group: str) -> None:
