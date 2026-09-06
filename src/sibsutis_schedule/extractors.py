@@ -19,6 +19,11 @@ def extract_year_month(html: str) -> tuple[int, int]:
     month_match = _MONTH_PATTERN.search(html)
 
     if not year_match or not month_match:
+        logger.error(
+            "Could not extract year/month from page JS. "
+            "year_match=%s, month_match=%s, html_snippet=%.500s",
+            year_match, month_match, html,
+        )
         raise RuntimeError("Could not extract year/month from the page JS.")
 
     year = int(year_match.group(1))

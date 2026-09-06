@@ -53,6 +53,22 @@ class AsyncSibsutisClient:
         self._authenticated = True
         logger.info("Authentication successful")
 
+    async def _fetch_schedule_page(self, group: str, month: int | None) -> str:
+        """Fetch the schedule page HTML, re-authenticating if the session expired."""
+        session: aiohttp.ClientSession = await self._ensure_session()
+
+        async with session.get(schedule_url(group, month)) as resp:
+            html: str = await resp.text()
+
+        if is_auth_failed(html):
+            logger.warning("Session expired, re-authenticating for group=%s", group)
+            self._authenticated = False
+            await self._authenticate(group)
+            async with session.get(schedule_url(group, month)) as resp:
+                html = await resp.text()
+
+        return html
+
     async def get_schedule(self, group: str, month: int | None = None) -> MonthSchedule:
         """Fetch and parse the schedule for a group
 
@@ -67,10 +83,7 @@ class AsyncSibsutisClient:
             await self._authenticate(group)
 
         logger.info("Fetching schedule for group=%s, month=%s", group, month)
-        session: aiohttp.ClientSession = await self._ensure_session()
-
-        async with session.get(schedule_url(group, month)) as resp:
-            html: str = await resp.text()
+        html = await self._fetch_schedule_page(group, month)
 
         return build_schedule(html, group)
 

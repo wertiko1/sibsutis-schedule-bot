@@ -41,6 +41,20 @@ class SibsutisClient:
         self._authenticated = True
         logger.info("Authentication successful")
 
+    def _fetch_schedule_page(self, group: str, month: int | None) -> str:
+        """Fetch the schedule page HTML, re-authenticating if the session expired."""
+        resp: requests.Response = self._session.get(schedule_url(group, month))
+        html: str = resp.text
+
+        if is_auth_failed(html):
+            logger.warning("Session expired, re-authenticating for group=%s", group)
+            self._authenticated = False
+            self._authenticate(group)
+            resp = self._session.get(schedule_url(group, month))
+            html = resp.text
+
+        return html
+
     def get_schedule(self, group: str, month: int | None = None) -> MonthSchedule:
         """Fetch and parse the schedule for a group
 
@@ -55,8 +69,8 @@ class SibsutisClient:
             self._authenticate(group)
 
         logger.info("Fetching schedule for group=%s, month=%s", group, month)
-        resp: requests.Response = self._session.get(schedule_url(group, month))
-        return build_schedule(resp.text, group)
+        html = self._fetch_schedule_page(group, month)
+        return build_schedule(html, group)
 
     def search_groups(self, query: str) -> list[dict[str, str]]:
         """Search available groups via AJAX API
