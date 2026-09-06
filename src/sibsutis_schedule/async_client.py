@@ -54,7 +54,7 @@ class AsyncSibsutisClient:
         logger.info("Authentication successful")
 
     async def _fetch_schedule_page(self, group: str, month: int | None) -> str:
-        """Fetch the schedule page HTML, re-authenticating if the session expired."""
+        """Fetch the schedule page HTML, re-authenticating if the session expired"""
         session: aiohttp.ClientSession = await self._ensure_session()
 
         async with session.get(schedule_url(group, month)) as resp:
