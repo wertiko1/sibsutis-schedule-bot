@@ -25,6 +25,8 @@ logs/
 *.log
 *.pid
 
+README.md
+
 src/Dockerfile
 docker-compose.override.yml
 
