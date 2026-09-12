@@ -8,6 +8,7 @@ ONBOARDING = (
     "⏰ /now — что идёт прямо сейчас\n"
     "📅 /today — расписание на сегодня\n"
     "📆 /tomorrow — расписание на завтра\n"
+    "📋 /week — расписание на неделю\n"
     "⚙️ /settings — сменить группу\n\n"
     "Для начала выбери свою группу 👇"
 )
@@ -17,7 +18,8 @@ HELP = (
     "⚙️ /settings — сменить группу\n"
     "⏰ /now — какая пара идёт прямо сейчас\n"
     "📅 /today — расписание на сегодня\n"
-    "📆 /tomorrow — расписание на завтра\n\n"
+    "📆 /tomorrow — расписание на завтра\n"
+    "📋 /week — расписание на неделю\n\n"
     "Нашёл баг или есть идея?\n"
     "Напиши — @yaroslav_kovtyn"
 )
@@ -49,6 +51,11 @@ NOW_FOCUSED = "📋 <b>Пара {i}/{total}:</b>"
 NOW_FOCUSED_STARTS_IN = "⏳ Начнётся через: <b>{time}</b>"
 NOW_FOCUSED_ONGOING = "🟢 Сейчас идёт · осталось: <b>{time}</b>"
 NOW_FOCUSED_FINISHED = "✅ Закончилась"
+
+# week
+WEEK_HEADER = "📋 <b>Неделя</b>  ·  {d_start:02d}.{m_start:02d}–{d_end:02d}.{m_end:02d}\n🎓 Группа <b>{group}</b>"
+WEEK_DAY = "\n<b>{wd}, {day:02d}.{month:02d}</b>"
+WEEK_NO_LESSONS = "  😴 <i>выходной</i>"
 
 # month
 MONTH_HEADER = "📆 <b>{name} {year}</b>\n🎓 Группа <b>{group}</b>"

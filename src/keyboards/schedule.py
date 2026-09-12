@@ -11,6 +11,7 @@ def main_menu(today_label: str, tomorrow_label: str) -> InlineKeyboardMarkup:
     builder.row(InlineKeyboardButton(text=buttons.BTN_NOW, callback_data="schedule_now"))
     builder.row(InlineKeyboardButton(text=f"📅  {today_label}", callback_data="schedule_today"))
     builder.row(InlineKeyboardButton(text=f"📆  {tomorrow_label}", callback_data="schedule_tomorrow"))
+    builder.row(InlineKeyboardButton(text=buttons.BTN_WEEK, callback_data="schedule_week"))
     builder.row(InlineKeyboardButton(text=buttons.BTN_MONTH_SELECT, callback_data="schedule_months"))
     return builder.as_markup()
 
@@ -108,6 +109,16 @@ def now_keyboard(current_slot: int, total_slots: int) -> InlineKeyboardMarkup:
 def lesson_detail_keyboard(day: int, month: int) -> InlineKeyboardMarkup:
     builder = InlineKeyboardBuilder()
     builder.row(InlineKeyboardButton(text=buttons.BTN_BACK_TO_DAY, callback_data=f"day_{month}_{day}"))
+    builder.row(InlineKeyboardButton(text=buttons.BTN_MENU, callback_data="back_main"))
+    return builder.as_markup()
+
+
+def week_keyboard(prev_cb: str, next_cb: str) -> InlineKeyboardMarkup:
+    builder = InlineKeyboardBuilder()
+    builder.row(
+        InlineKeyboardButton(text=buttons.BTN_PREV, callback_data=prev_cb),
+        InlineKeyboardButton(text=buttons.BTN_NEXT, callback_data=next_cb),
+    )
     builder.row(InlineKeyboardButton(text=buttons.BTN_MENU, callback_data="back_main"))
     return builder.as_markup()
 

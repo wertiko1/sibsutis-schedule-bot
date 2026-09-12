@@ -9,6 +9,7 @@ from .lesson import (
 )
 from .month import format_month_overview
 from .now import format_now
+from .week import format_week
 
 __all__ = [
     "day_button_label",
@@ -21,4 +22,5 @@ __all__ = [
     "format_slot_detail",
     "lesson_button_label",
     "slot_button_label",
+    "format_week",
 ]
