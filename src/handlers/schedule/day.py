@@ -8,8 +8,8 @@ from keyboards.schedule import day_keyboard, lesson_detail_keyboard
 from models import User
 from services.formatter import format_day_header, format_slot_detail, slot_button_label
 from services.formatter._helpers import group_lessons
-
 from . import service, today
+
 router = Router()
 
 

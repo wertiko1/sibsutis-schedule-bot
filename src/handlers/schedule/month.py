@@ -6,7 +6,6 @@ from models import User
 from services.formatter import format_month_overview
 from services.formatter._helpers import group_lessons
 from texts import messages
-
 from . import service, today
 
 router = Router()

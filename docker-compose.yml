@@ -1,7 +1,6 @@
 services:
   db:
     image: postgres:16.2
-    container_name: postgres
     hostname: ${DB_HOST}
     environment:
       POSTGRES_USER: ${DB_USER}
@@ -43,3 +42,4 @@ services:
 
 volumes:
   postgres_data:
+    name: sibsutis-bot-pgdata

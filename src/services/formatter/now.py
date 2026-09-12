@@ -1,18 +1,16 @@
 from datetime import time
 
 from sibsutis_schedule import DaySchedule
-
 from texts import common, messages
-
 from ._helpers import format_minutes, group_lessons, lesson_word, minutes_between, parse_time
 from .lesson import format_slot
 
 
 def format_now(
-    day: DaySchedule,
-    group: str,
-    now: time,
-    focus_slot: int | None = None,
+        day: DaySchedule,
+        group: str,
+        now: time,
+        focus_slot: int | None = None,
 ) -> tuple[str, int, int]:
     wd = common.WEEKDAYS_SHORT.get(day.weekday, day.weekday)
     header = messages.NOW_HEADER.format(day=day.day, month=day.month, wd=wd, group=group)

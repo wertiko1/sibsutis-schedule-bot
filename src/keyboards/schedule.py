@@ -30,9 +30,9 @@ def months_menu(current_month: int) -> InlineKeyboardMarkup:
 
 
 def month_overview_keyboard(
-    year: int,
-    month: int,
-    day_lesson_counts: dict[int, int],
+        year: int,
+        month: int,
+        day_lesson_counts: dict[int, int],
 ) -> InlineKeyboardMarkup:
     builder = InlineKeyboardBuilder()
 
@@ -140,10 +140,10 @@ def lesson_detail_keyboard(day: int, month: int) -> InlineKeyboardMarkup:
 
 
 def week_keyboard(
-    day_labels: list[str],
-    day_callbacks: list[str],
-    prev_cb: str,
-    next_cb: str,
+        day_labels: list[str],
+        day_callbacks: list[str],
+        prev_cb: str,
+        next_cb: str,
 ) -> InlineKeyboardMarkup:
     builder = InlineKeyboardBuilder()
 

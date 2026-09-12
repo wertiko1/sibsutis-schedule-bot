@@ -13,7 +13,8 @@ Telegram позволяет добавлять кастомные эмодзи �
 
 ### 2. Готовый каталог
 
-- [premium-telegram-emoji](https://github.com/Zulut30/premium-telegram-emoji/blob/main/references/emoji-catalog.md) — 275+ эмодзи с ID и превью
+- [premium-telegram-emoji](https://github.com/Zulut30/premium-telegram-emoji/blob/main/references/emoji-catalog.md) —
+  275+ эмодзи с ID и превью
 
 ### 3. Где искать эмодзипаки
 
@@ -52,6 +53,7 @@ InlineKeyboardButton(
 from aiogram.utils.keyboard import InlineKeyboardBuilder
 
 INVISIBLE = "\u2060"
+
 
 def nav_keyboard(page: int, total: int) -> InlineKeyboardMarkup:
     builder = InlineKeyboardBuilder()

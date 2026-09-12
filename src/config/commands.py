@@ -2,7 +2,6 @@ from aiogram.types import BotCommand
 
 from texts import commands
 
-
 COMMANDS: list[BotCommand] = [
     BotCommand(command="start", description=commands.CMD_START),
     BotCommand(command="help", description=commands.CMD_HELP),

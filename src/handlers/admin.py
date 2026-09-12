@@ -10,7 +10,6 @@ from services.stats_service import (
     get_hub_stats, get_activity_stats, get_actions_stats, get_audience_stats,
     format_hub, format_activity, format_actions, format_audience,
 )
-
 from .deps import NOVO_TZ
 
 router = Router()

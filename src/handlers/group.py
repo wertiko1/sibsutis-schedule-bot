@@ -2,12 +2,12 @@ from aiogram import Router, F
 from aiogram.fsm.context import FSMContext
 from aiogram.types import CallbackQuery, Message
 
-from .deps import service
 from keyboards.group import cancel_keyboard, group_results_keyboard, onboarding_keyboard, settings_keyboard
 from keyboards.schedule import back_to_main
 from models import User
 from states import GroupStates
 from texts import messages
+from .deps import service
 
 router = Router()
 

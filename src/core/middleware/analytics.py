@@ -26,10 +26,10 @@ def _extract_event(event: TelegramObject) -> tuple[int | None, str | None, str |
 
 class AnalyticsMiddleware(BaseMiddleware):
     async def __call__(
-        self,
-        handler: Callable[[TelegramObject, dict[str, Any]], Awaitable[Any]],
-        event: TelegramObject,
-        data: dict[str, Any],
+            self,
+            handler: Callable[[TelegramObject, dict[str, Any]], Awaitable[Any]],
+            event: TelegramObject,
+            data: dict[str, Any],
     ) -> Any:
         user_id, action, payload = _extract_event(event)
 

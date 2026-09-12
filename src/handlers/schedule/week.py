@@ -9,7 +9,6 @@ from models import User
 from services.formatter import day_button_label, format_day_header, format_slot_detail, slot_button_label, format_week
 from services.formatter._helpers import group_lessons
 from sibsutis_schedule import DaySchedule
-
 from . import service, today
 
 router = Router()

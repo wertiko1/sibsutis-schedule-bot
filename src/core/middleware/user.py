@@ -32,10 +32,10 @@ async def _is_allowed_without_group(event: TelegramObject, data: dict[str, Any])
 
 class UserMiddleware(BaseMiddleware):
     async def __call__(
-        self,
-        handler: Callable[[TelegramObject, dict[str, Any]], Awaitable[Any]],
-        event: TelegramObject,
-        data: dict[str, Any],
+            self,
+            handler: Callable[[TelegramObject, dict[str, Any]], Awaitable[Any]],
+            event: TelegramObject,
+            data: dict[str, Any],
     ) -> Any:
         tg_user = _get_tg_user(event)
         if not tg_user:

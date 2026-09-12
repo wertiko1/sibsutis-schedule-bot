@@ -10,11 +10,11 @@ DEFAULT_TTL_SECONDS = 30 * 60
 
 class ScheduleService:
     def __init__(
-        self,
-        login: str,
-        password: str,
-        proxy_url: str | None = None,
-        cache_ttl: int = DEFAULT_TTL_SECONDS,
+            self,
+            login: str,
+            password: str,
+            proxy_url: str | None = None,
+            cache_ttl: int = DEFAULT_TTL_SECONDS,
     ) -> None:
         self._client = AsyncSibsutisClient(login, password, proxy_url=proxy_url)
         self._cache: dict[tuple[str, int], tuple[MonthSchedule, float]] = {}

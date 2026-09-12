@@ -9,6 +9,7 @@ NOVO_TZ = timezone(timedelta(hours=7))
 def today() -> date:
     return datetime.now(NOVO_TZ).date()
 
+
 service = ScheduleService(
     login=settings.sibsutis.LOGIN,
     password=settings.sibsutis.PASSWORD,

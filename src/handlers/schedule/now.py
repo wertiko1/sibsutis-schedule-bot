@@ -8,7 +8,6 @@ from aiogram.types import CallbackQuery, Message
 from keyboards.schedule import now_keyboard
 from models import User
 from services.formatter import format_now
-
 from . import NOVO_TZ, service
 
 router = Router()

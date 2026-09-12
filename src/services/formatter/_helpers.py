@@ -1,7 +1,6 @@
 from datetime import time
 
 from sibsutis_schedule import Lesson
-
 from texts import common
 
 _RU_VOWELS = frozenset("аеёиоуыэюяАЕЁИОУЫЭЮЯ")
@@ -82,9 +81,9 @@ def group_lessons(lessons: list[Lesson]) -> list[list[Lesson]]:
     groups: list[list[Lesson]] = []
     for lesson in lessons:
         if (
-            groups
-            and groups[-1][0].time_begin == lesson.time_begin
-            and groups[-1][0].time_end == lesson.time_end
+                groups
+                and groups[-1][0].time_begin == lesson.time_begin
+                and groups[-1][0].time_end == lesson.time_end
         ):
             groups[-1].append(lesson)
         else:

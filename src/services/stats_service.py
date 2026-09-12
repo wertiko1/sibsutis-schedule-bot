@@ -40,7 +40,6 @@ class ActivityStats:
 @dataclass
 class ActionsStats:
     top_actions: list[tuple[str, int]]
-    top_groups: list[dict]
 
 
 @dataclass
@@ -53,6 +52,7 @@ class AudienceStats:
     retention_prev: int
     retention_retained: int
     retention_pct: float
+    top_groups: list[dict]
 
 
 # ── time helpers ──
@@ -198,16 +198,7 @@ async def get_actions_stats() -> ActionsStats:
             merged[label] = merged.get(label, 0) + row["cnt"]
     top_actions = sorted(merged.items(), key=lambda x: x[1], reverse=True)[:10]
 
-    top_groups = (
-        await User.filter(group_id__not_isnull=True)
-        .annotate(cnt=Count("user_id"))
-        .group_by("group_name")
-        .order_by("-cnt")
-        .limit(10)
-        .values("group_name", "cnt")
-    )
-
-    return ActionsStats(top_actions=top_actions, top_groups=list(top_groups))
+    return ActionsStats(top_actions=top_actions)
 
 
 async def get_audience_stats(now: datetime) -> AudienceStats:
@@ -231,10 +222,20 @@ async def get_audience_stats(now: datetime) -> AudienceStats:
     retained_count = len(retained)
     pct = round(retained_count / prev_count * 100, 1) if prev_count else 0
 
+    top_groups = (
+        await User.filter(group_id__not_isnull=True)
+        .annotate(cnt=Count("user_id"))
+        .group_by("group_name")
+        .order_by("-cnt")
+        .limit(10)
+        .values("group_name", "cnt")
+    )
+
     return AudienceStats(
         total_users=total_users, users_with_group=users_with_group,
         new_today=new_today, new_week=new_week, new_month=new_month,
         retention_prev=prev_count, retention_retained=retained_count, retention_pct=pct,
+        top_groups=list(top_groups),
     )
 
 
@@ -248,7 +249,8 @@ def format_hub(data: HubStats, now: datetime) -> str:
     lines = [
         messages.STATS_HUB_HEADER,
         "",
-        messages.STATS_HUB_TODAY.format(date=today_date, active=data.today_active, events=data.today_events, new=data.today_new),
+        messages.STATS_HUB_TODAY.format(date=today_date, active=data.today_active, events=data.today_events,
+                                        new=data.today_new),
         "",
         messages.STATS_HUB_WEEK.format(
             start=f"{week_start.day:02d}.{week_start.month:02d}",
@@ -299,13 +301,6 @@ def format_actions(data: ActionsStats) -> str:
     lines = [messages.STATS_ACTIONS_HEADER]
     for label, cnt in data.top_actions:
         lines.append(f"{label} — <code>{cnt}</code>")
-
-    if data.top_groups:
-        lines.append("")
-        lines.append(messages.STATS_GROUPS_HEADER)
-        for row in data.top_groups:
-            lines.append(f"{row['group_name']} — {row['cnt']} чел.")
-
     return "\n".join(lines)
 
 
@@ -327,4 +322,11 @@ def format_audience(data: AudienceStats) -> str:
             pct=data.retention_pct,
         ),
     ]
+
+    if data.top_groups:
+        lines.append("")
+        lines.append(messages.STATS_GROUPS_HEADER)
+        for row in data.top_groups:
+            lines.append(f"{row['group_name']} — {row['cnt']} чел.")
+
     return "\n".join(lines)
