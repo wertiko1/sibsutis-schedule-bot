@@ -4,9 +4,10 @@ from aiogram import Router, F
 from aiogram.filters import Command
 from aiogram.types import CallbackQuery, Message
 
-from keyboards.schedule import week_keyboard
+from keyboards.schedule import week_keyboard, week_day_keyboard, week_lesson_detail_keyboard
 from models import User
-from services.formatter import day_button_label, format_week
+from services.formatter import day_button_label, format_day_header, format_slot_detail, slot_button_label, format_week
+from services.formatter._helpers import group_lessons
 from sibsutis_schedule import DaySchedule
 
 from . import service, today
@@ -39,7 +40,7 @@ def _build_day_buttons(days: list[DaySchedule]) -> tuple[list[str], list[str]]:
     for day in days:
         prefix = f"{day.day:02d}.{day.month:02d}"
         labels.append(day_button_label(day, prefix))
-        callbacks.append(f"day_{day.month}_{day.day}")
+        callbacks.append(f"wday_{day.month}_{day.day}")
     return labels, callbacks
 
 
@@ -83,4 +84,38 @@ async def cb_week_nav(call: CallbackQuery, user: User) -> None:
     monday = date(year, month, day)
 
     await _edit_week(call.message, user.group_id, user.group_name, monday)
+    await call.answer()
+
+
+@router.callback_query(F.data.regexp(r"^wday_\d+_\d+$"))
+async def cb_week_day(call: CallbackQuery, user: User) -> None:
+    _, month_str, day_str = call.data.split("_")
+    month = int(month_str)
+    day = int(day_str)
+
+    schedule = await service.get_month(user.group_id, month)
+    day_schedule = schedule.days[day - 1]
+    text = format_day_header(day_schedule, user.group_name)
+    slots = group_lessons(day_schedule.lessons)
+    labels = [slot_button_label(slot) for slot in slots]
+    max_day = len(schedule.days)
+
+    await call.message.edit_text(text, reply_markup=week_day_keyboard(day, month, max_day, labels))
+    await call.answer()
+
+
+@router.callback_query(F.data.regexp(r"^wles_\d+_\d+_\d+$"))
+async def cb_week_lesson(call: CallbackQuery, user: User) -> None:
+    _, month_str, day_str, idx_str = call.data.split("_")
+    month = int(month_str)
+    day = int(day_str)
+    idx = int(idx_str)
+
+    schedule = await service.get_month(user.group_id, month)
+    day_schedule = schedule.days[day - 1]
+    slots = group_lessons(day_schedule.lessons)
+    slot = slots[idx]
+    text = format_slot_detail(slot, day_schedule, user.group_name)
+
+    await call.message.edit_text(text, reply_markup=week_lesson_detail_keyboard(day, month))
     await call.answer()

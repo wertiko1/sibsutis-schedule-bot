@@ -91,6 +91,32 @@ def day_keyboard(day: int, month: int, max_day: int, lesson_labels: list[str]) -
     return builder.as_markup()
 
 
+def week_day_keyboard(day: int, month: int, max_day: int, lesson_labels: list[str]) -> InlineKeyboardMarkup:
+    builder = InlineKeyboardBuilder()
+
+    for i, label in enumerate(lesson_labels):
+        builder.row(InlineKeyboardButton(text=label, callback_data=f"wles_{month}_{day}_{i}"))
+
+    nav: list[InlineKeyboardButton] = []
+    if day > 1:
+        nav.append(InlineKeyboardButton(text=buttons.BTN_PREV, callback_data=f"wday_{month}_{day - 1}"))
+    nav.append(InlineKeyboardButton(text=f"{day:02d}.{month:02d}", callback_data="noop"))
+    if day < max_day:
+        nav.append(InlineKeyboardButton(text=buttons.BTN_NEXT, callback_data=f"wday_{month}_{day + 1}"))
+    builder.row(*nav)
+
+    builder.row(InlineKeyboardButton(text=buttons.BTN_TO_WEEK, callback_data="schedule_week"))
+    builder.row(InlineKeyboardButton(text=buttons.BTN_MENU, callback_data="back_main"))
+    return builder.as_markup()
+
+
+def week_lesson_detail_keyboard(day: int, month: int) -> InlineKeyboardMarkup:
+    builder = InlineKeyboardBuilder()
+    builder.row(InlineKeyboardButton(text=buttons.BTN_BACK_TO_DAY, callback_data=f"wday_{month}_{day}"))
+    builder.row(InlineKeyboardButton(text=buttons.BTN_MENU, callback_data="back_main"))
+    return builder.as_markup()
+
+
 def now_keyboard(current_slot: int, total_slots: int) -> InlineKeyboardMarkup:
     builder = InlineKeyboardBuilder()
 
