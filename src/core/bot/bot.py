@@ -28,6 +28,9 @@ async def setup_bot() -> AppContext:
     loader = RouterLoader("handlers", dp)
     loader.load()
 
+    from handlers.deps import service
+    service.start_background_refresh()
+
     await bot.set_my_commands(settings.commands)
     await bot.delete_webhook(drop_pending_updates=True)
 
