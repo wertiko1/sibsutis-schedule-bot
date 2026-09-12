@@ -43,3 +43,4 @@ services:
 volumes:
   postgres_data:
     name: sibsutis-bot-pgdata
+    external: true

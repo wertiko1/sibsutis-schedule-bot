@@ -7,7 +7,7 @@ class Migration(migrations.Migration):
     operations = [
         ops.AddField(
             model_name="User",
-            field_name="notify",
-            field_object=fields.BooleanField(default=True),
+            name="notify",
+            field=fields.BooleanField(default=True),
         ),
     ]
