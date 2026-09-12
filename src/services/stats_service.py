@@ -1,10 +1,173 @@
+from dataclasses import dataclass
 from datetime import datetime, timedelta
 
 from tortoise.functions import Count
 
 from config.stats import ACTION_LABELS, IGNORED_ACTIONS, PREFIX_LABELS
 from models import Event, User
-from texts import messages
+from texts import common, messages
+
+
+# ── data classes ──
+
+@dataclass
+class HubStats:
+    today_active: int
+    today_events: int
+    today_new: int
+    week_active: int
+    week_events: int
+    week_new: int
+    total_users: int
+    users_with_group: int
+
+
+@dataclass
+class PeriodDetail:
+    active: int
+    events: int
+    trend_pct: float | None  # None = no previous data
+
+
+@dataclass
+class ActivityStats:
+    today: PeriodDetail
+    week: PeriodDetail
+    top_weekday: str | None
+    top_weekday_pct: float
+
+
+@dataclass
+class ActionsStats:
+    top_actions: list[tuple[str, int]]
+    top_groups: list[dict]
+
+
+@dataclass
+class AudienceStats:
+    total_users: int
+    users_with_group: int
+    new_today: int
+    new_week: int
+    new_month: int
+    retention_prev: int
+    retention_retained: int
+    retention_pct: float
+
+
+# ── time helpers ──
+
+WEEKDAY_NAMES = ["Пн", "Вт", "Ср", "Чт", "Пт", "Сб", "Вс"]
+
+
+def _day_start(dt: datetime) -> datetime:
+    return dt.replace(hour=0, minute=0, second=0, microsecond=0)
+
+
+def _monday_of(dt: datetime) -> datetime:
+    return _day_start(dt) - timedelta(days=dt.weekday())
+
+
+# ── query helpers ──
+
+async def _active_count(since: datetime, until: datetime | None = None) -> int:
+    qs = Event.filter(created_at__gte=since)
+    if until:
+        qs = qs.filter(created_at__lt=until)
+    rows = await qs.distinct().values_list("user_id", flat=True)
+    return len(rows)
+
+
+async def _event_count(since: datetime, until: datetime | None = None) -> int:
+    qs = Event.filter(created_at__gte=since)
+    if until:
+        qs = qs.filter(created_at__lt=until)
+    return await qs.count()
+
+
+async def _new_users_count(since: datetime) -> int:
+    from tortoise import Tortoise
+    conn = Tortoise.get_connection("default")
+    _, rows = await conn.execute_query(
+        "SELECT COUNT(*) AS cnt FROM ("
+        "  SELECT user_id FROM events GROUP BY user_id HAVING MIN(created_at) >= $1"
+        ") sub",
+        [since],
+    )
+    return rows[0]["cnt"] if rows else 0
+
+
+async def _active_user_ids(since: datetime, until: datetime | None = None) -> set[int]:
+    qs = Event.filter(created_at__gte=since)
+    if until:
+        qs = qs.filter(created_at__lt=until)
+    rows = await qs.distinct().values_list("user_id", flat=True)
+    return set(rows)
+
+
+# ── queries ──
+
+async def get_hub_stats(now: datetime) -> HubStats:
+    today_start = _day_start(now)
+    week_start = _monday_of(now)
+
+    today_active = await _active_count(today_start)
+    today_events = await _event_count(today_start)
+    today_new = await _new_users_count(today_start)
+
+    week_active = await _active_count(week_start)
+    week_events = await _event_count(week_start)
+    week_new = await _new_users_count(week_start)
+
+    total_users = await User.all().count()
+    users_with_group = await User.filter(group_id__not_isnull=True).count()
+
+    return HubStats(
+        today_active=today_active, today_events=today_events, today_new=today_new,
+        week_active=week_active, week_events=week_events, week_new=week_new,
+        total_users=total_users, users_with_group=users_with_group,
+    )
+
+
+async def get_activity_stats(now: datetime) -> ActivityStats:
+    today_start = _day_start(now)
+    yesterday_start = today_start - timedelta(days=1)
+    week_start = _monday_of(now)
+    prev_week_start = week_start - timedelta(weeks=1)
+
+    today_events = await _event_count(today_start)
+    today_active = await _active_count(today_start)
+    yesterday_events = await _event_count(yesterday_start, today_start)
+
+    week_events = await _event_count(week_start)
+    week_active = await _active_count(week_start)
+    prev_week_events = await _event_count(prev_week_start, week_start)
+
+    today_trend = ((today_events - yesterday_events) / yesterday_events * 100) if yesterday_events else None
+    week_trend = ((week_events - prev_week_events) / prev_week_events * 100) if prev_week_events else None
+
+    # top weekday
+    from tortoise import Tortoise
+    conn = Tortoise.get_connection("default")
+    _, rows = await conn.execute_query(
+        "SELECT EXTRACT(isodow FROM created_at AT TIME ZONE 'UTC+7') AS dow, COUNT(*) AS cnt "
+        "FROM events GROUP BY dow ORDER BY cnt DESC",
+    )
+
+    top_wd = None
+    top_wd_pct = 0.0
+    if rows:
+        total = sum(r["cnt"] for r in rows)
+        top = rows[0]
+        dow_idx = int(top["dow"]) - 1  # isodow: 1=Mon, 7=Sun
+        top_wd = WEEKDAY_NAMES[dow_idx] if 0 <= dow_idx < 7 else None
+        top_wd_pct = round(top["cnt"] / total * 100, 1) if total else 0
+
+    return ActivityStats(
+        today=PeriodDetail(active=today_active, events=today_events, trend_pct=today_trend),
+        week=PeriodDetail(active=week_active, events=week_events, trend_pct=week_trend),
+        top_weekday=top_wd, top_weekday_pct=top_wd_pct,
+    )
 
 
 def _action_label(action: str) -> str | None:
@@ -18,33 +181,7 @@ def _action_label(action: str) -> str | None:
     return action
 
 
-async def get_stats(now: datetime) -> str:
-    day_ago = now - timedelta(days=1)
-    week_ago = now - timedelta(days=7)
-
-    total_users = await User.all().count()
-    users_with_group = await User.filter(group_id__not_isnull=True).count()
-
-    events_today = await Event.filter(created_at__gte=day_ago).count()
-    events_week = await Event.filter(created_at__gte=week_ago).count()
-    events_total = await Event.all().count()
-
-    active_today = (
-        await Event.filter(created_at__gte=day_ago)
-        .distinct()
-        .values_list("user_id", flat=True)
-    )
-    active_week = (
-        await Event.filter(created_at__gte=week_ago)
-        .distinct()
-        .values_list("user_id", flat=True)
-    )
-    active_total = (
-        await Event.all()
-        .distinct()
-        .values_list("user_id", flat=True)
-    )
-
+async def get_actions_stats() -> ActionsStats:
     top_actions_raw = (
         await Event.all()
         .exclude(action__in=IGNORED_ACTIONS)
@@ -70,30 +207,124 @@ async def get_stats(now: datetime) -> str:
         .values("group_name", "cnt")
     )
 
-    periods = [
-        ("День", len(active_today), events_today),
-        ("Неделя", len(active_week), events_week),
-        ("Всего", len(active_total), events_total),
-    ]
+    return ActionsStats(top_actions=top_actions, top_groups=list(top_groups))
+
+
+async def get_audience_stats(now: datetime) -> AudienceStats:
+    today_start = _day_start(now)
+    week_start = _monday_of(now)
+    month_start = _day_start(now.replace(day=1))
+    prev_week_start = week_start - timedelta(weeks=1)
+
+    total_users = await User.all().count()
+    users_with_group = await User.filter(group_id__not_isnull=True).count()
+
+    new_today = await _new_users_count(today_start)
+    new_week = await _new_users_count(week_start)
+    new_month = await _new_users_count(month_start)
+
+    prev_users = await _active_user_ids(prev_week_start, week_start)
+    curr_users = await _active_user_ids(week_start)
+    retained = prev_users & curr_users
+
+    prev_count = len(prev_users)
+    retained_count = len(retained)
+    pct = round(retained_count / prev_count * 100, 1) if prev_count else 0
+
+    return AudienceStats(
+        total_users=total_users, users_with_group=users_with_group,
+        new_today=new_today, new_week=new_week, new_month=new_month,
+        retention_prev=prev_count, retention_retained=retained_count, retention_pct=pct,
+    )
+
+
+# ── formatters ──
+
+def format_hub(data: HubStats, now: datetime) -> str:
+    today_date = f"{now.day:02d}.{now.month:02d}"
+    week_start = _monday_of(now)
+    week_end = week_start + timedelta(days=6)
 
     lines = [
-        messages.STATS_HEADER,
+        messages.STATS_HUB_HEADER,
         "",
-        messages.STATS_USERS.format(total=total_users, with_group=users_with_group),
+        messages.STATS_HUB_TODAY.format(date=today_date, active=data.today_active, events=data.today_events, new=data.today_new),
         "",
+        messages.STATS_HUB_WEEK.format(
+            start=f"{week_start.day:02d}.{week_start.month:02d}",
+            end=f"{week_end.day:02d}.{week_end.month:02d}",
+            active=data.week_active, events=data.week_events, new=data.week_new,
+        ),
+        "",
+        messages.STATS_HUB_TOTAL.format(total=data.total_users, with_group=data.users_with_group),
     ]
-    for period, active, events in periods:
-        lines.append(messages.STATS_PERIOD.format(period=period, active=active, events=events))
+    return "\n".join(lines)
 
-    lines.append("")
-    lines.append(messages.STATS_TOP_ACTIONS)
-    for label, cnt in top_actions:
+
+def _format_trend(pct: float | None, vs: str) -> str:
+    if pct is None:
+        return messages.STATS_ACT_TREND_NA
+    arrow = "↑" if pct >= 0 else "↓"
+    return messages.STATS_ACT_TREND.format(arrow=arrow, pct=f"{abs(pct):.0f}", vs=vs)
+
+
+def format_activity(data: ActivityStats, now: datetime) -> str:
+    today_date = f"{now.day:02d}.{now.month:02d}"
+    wd = common.WEEKDAY_HEADERS[now.weekday()]
+    week_start = _monday_of(now)
+    week_end = week_start + timedelta(days=6)
+
+    lines = [
+        messages.STATS_ACT_HEADER,
+        "",
+        messages.STATS_ACT_TODAY.format(wd=wd, date=today_date, active=data.today.active, events=data.today.events),
+        _format_trend(data.today.trend_pct, "вчера"),
+        "",
+        messages.STATS_ACT_WEEK.format(
+            start=f"{week_start.day:02d}.{week_start.month:02d}",
+            end=f"{week_end.day:02d}.{week_end.month:02d}",
+            active=data.week.active, events=data.week.events,
+        ),
+        _format_trend(data.week.trend_pct, "прошлая неделя"),
+    ]
+
+    if data.top_weekday:
+        lines.append("")
+        lines.append(messages.STATS_ACT_TOP_DAY.format(wd=data.top_weekday, pct=data.top_weekday_pct))
+
+    return "\n".join(lines)
+
+
+def format_actions(data: ActionsStats) -> str:
+    lines = [messages.STATS_ACTIONS_HEADER]
+    for label, cnt in data.top_actions:
         lines.append(f"{label} — <code>{cnt}</code>")
 
-    if top_groups:
+    if data.top_groups:
         lines.append("")
-        lines.append(messages.STATS_TOP_GROUPS)
-        for row in top_groups:
+        lines.append(messages.STATS_GROUPS_HEADER)
+        for row in data.top_groups:
             lines.append(f"{row['group_name']} — {row['cnt']} чел.")
 
+    return "\n".join(lines)
+
+
+def format_audience(data: AudienceStats) -> str:
+    lines = [
+        messages.STATS_AUD_HEADER,
+        "",
+        messages.STATS_AUD_TOTAL.format(total=data.total_users, with_group=data.users_with_group),
+        "",
+        messages.STATS_AUD_NEW_HEADER,
+        messages.STATS_AUD_NEW_LINE.format(period="Сегодня", count=data.new_today),
+        messages.STATS_AUD_NEW_LINE.format(period="За неделю", count=data.new_week),
+        messages.STATS_AUD_NEW_LINE.format(period="За месяц", count=data.new_month),
+        "",
+        messages.STATS_AUD_RET_HEADER,
+        messages.STATS_AUD_RET.format(
+            prev=data.retention_prev,
+            retained=data.retention_retained,
+            pct=data.retention_pct,
+        ),
+    ]
     return "\n".join(lines)

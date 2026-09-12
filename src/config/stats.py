@@ -16,7 +16,7 @@ ACTION_LABELS: dict[str, str] = {
     "message": "Текстовое сообщение",
 }
 
-IGNORED_ACTIONS = {"back_main", "noop", "/stats"}
+IGNORED_ACTIONS = {"back_main", "noop", "/stats", "st_hub", "st_activity", "st_actions", "st_audience"}
 
 PREFIX_LABELS = [
     ("week_", "Навигация по неделям"),

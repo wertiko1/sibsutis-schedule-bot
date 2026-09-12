@@ -82,9 +82,28 @@ LESSON_DETAIL_TEACHER = "👤 {teachers}"
 LESSON_DETAIL_ROOM = "🚪 {room}"
 LESSON_DETAIL_FOOTER = "📅 {day:02d}.{month:02d}.{year} — {wd}  ·  🎓 <b>{group}</b>"
 
-# stats
-STATS_HEADER = "📊 <b>Статистика</b>"
-STATS_USERS = "👥 Юзеров: <b>{total}</b> (с группой: <b>{with_group}</b>)"
-STATS_PERIOD = "{period} — <b>{active}</b> активных · <b>{events}</b> событий"
-STATS_TOP_ACTIONS = "🔥 <b>Топ действий:</b>"
-STATS_TOP_GROUPS = "🎓 <b>Топ групп:</b>"
+# stats — hub
+STATS_HUB_HEADER = "📊 <b>Статистика</b>"
+STATS_HUB_TODAY = "☀️ <b>Сегодня</b> ({date})\nАктивных: <b>{active}</b> · Событий: <b>{events}</b> · Новых: <b>{new}</b>"
+STATS_HUB_WEEK = "📅 <b>Неделя</b> ({start}–{end})\nАктивных: <b>{active}</b> · Событий: <b>{events}</b> · Новых: <b>{new}</b>"
+STATS_HUB_TOTAL = "👥 Всего юзеров: <b>{total}</b> (с группой: <b>{with_group}</b>)"
+
+# stats — activity
+STATS_ACT_HEADER = "📈 <b>Активность</b>"
+STATS_ACT_TODAY = "☀️ <b>Сегодня</b> ({wd}, {date})\nАктивных: <b>{active}</b> · Событий: <b>{events}</b>"
+STATS_ACT_WEEK = "📅 <b>Неделя</b> ({start}–{end})\nАктивных: <b>{active}</b> · Событий: <b>{events}</b>"
+STATS_ACT_TREND = "Тренд: <b>{arrow}{pct}%</b> vs {vs}"
+STATS_ACT_TREND_NA = "Тренд: —"
+STATS_ACT_TOP_DAY = "📊 <b>Самый активный день</b>\n{wd} — {pct}% событий"
+
+# stats — actions
+STATS_ACTIONS_HEADER = "🔥 <b>Топ действий</b>"
+STATS_GROUPS_HEADER = "🎓 <b>Топ групп</b>"
+
+# stats — audience
+STATS_AUD_HEADER = "👥 <b>Аудитория</b>"
+STATS_AUD_TOTAL = "Всего: <b>{total}</b> (с группой: <b>{with_group}</b>)"
+STATS_AUD_NEW_HEADER = "🆕 <b>Новые пользователи</b>"
+STATS_AUD_NEW_LINE = "{period}: <b>{count}</b>"
+STATS_AUD_RET_HEADER = "🔄 <b>Удержание</b>"
+STATS_AUD_RET = "Прошлая неделя: <b>{prev}</b> активных\nВернулись на этой: <b>{retained}</b> ({pct}%)"
