@@ -4,12 +4,14 @@ from aiogram import Router, F
 from aiogram.filters import Command, CommandStart
 from aiogram.types import CallbackQuery, Message
 
-from .deps import service, today
 from keyboards.group import onboarding_keyboard, settings_keyboard
 from keyboards.schedule import main_menu
 from models import User
 from services.formatter import day_button_label
 from texts import common, messages
+from .deps import service, today
+
+_NOTIFY_STATUS = {True: "включены 🔔", False: "отключены 🔕"}
 
 router = Router()
 
@@ -60,8 +62,24 @@ async def cmd_help(message: Message) -> None:
 
 @router.message(Command("settings"))
 async def cmd_settings(message: Message, user: User) -> None:
-    text = messages.GROUP_CURRENT.format(group=user.group_name or "—")
-    await message.answer(text, reply_markup=settings_keyboard())
+    text = messages.GROUP_CURRENT.format(
+        group=user.group_name or "—",
+        notify_status=_NOTIFY_STATUS[user.notify],
+    )
+    await message.answer(text, reply_markup=settings_keyboard(user.notify))
+
+
+@router.callback_query(F.data == "toggle_notify")
+async def cb_toggle_notify(call: CallbackQuery, user: User) -> None:
+    user.notify = not user.notify
+    await user.save()
+    status = messages.NOTIFY_ENABLED if user.notify else messages.NOTIFY_DISABLED
+    await call.answer(status, show_alert=True)
+    text = messages.GROUP_CURRENT.format(
+        group=user.group_name or "—",
+        notify_status=_NOTIFY_STATUS[user.notify],
+    )
+    await call.message.edit_text(text, reply_markup=settings_keyboard(user.notify))
 
 
 @router.callback_query(F.data == "noop")

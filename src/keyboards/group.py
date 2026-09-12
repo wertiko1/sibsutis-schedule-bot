@@ -7,12 +7,12 @@ PAGE_SIZE = 24
 
 
 def group_results_keyboard(
-    groups: list[dict[str, str]],
-    page: int = 0,
+        groups: list[dict[str, str]],
+        page: int = 0,
 ) -> InlineKeyboardMarkup:
     total = len(groups)
     start = page * PAGE_SIZE
-    page_groups = groups[start : start + PAGE_SIZE]
+    page_groups = groups[start: start + PAGE_SIZE]
 
     builder = InlineKeyboardBuilder()
     for g in page_groups:
@@ -37,10 +37,20 @@ def group_results_keyboard(
     return builder.as_markup()
 
 
-def settings_keyboard() -> InlineKeyboardMarkup:
+def settings_keyboard(notify_enabled: bool) -> InlineKeyboardMarkup:
     builder = InlineKeyboardBuilder()
     builder.row(InlineKeyboardButton(text=buttons.BTN_CHANGE_GROUP, callback_data="change_group"))
+    if notify_enabled:
+        builder.row(InlineKeyboardButton(text=buttons.BTN_NOTIFY_OFF, callback_data="toggle_notify"))
+    else:
+        builder.row(InlineKeyboardButton(text=buttons.BTN_NOTIFY_ON, callback_data="toggle_notify"))
     builder.row(InlineKeyboardButton(text=buttons.BTN_MENU, callback_data="back_main"))
+    return builder.as_markup()
+
+
+def notification_keyboard() -> InlineKeyboardMarkup:
+    builder = InlineKeyboardBuilder()
+    builder.row(InlineKeyboardButton(text=buttons.BTN_NOTIFY_DISABLE, callback_data="toggle_notify"))
     return builder.as_markup()
 
 

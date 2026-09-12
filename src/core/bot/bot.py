@@ -29,9 +29,13 @@ async def setup_bot() -> AppContext:
     loader.load()
 
     from handlers.deps import service
+    from services.notification_service import NotificationService
     service.start_background_refresh()
+
+    notifier = NotificationService(bot, service)
+    notifier.start()
 
     await bot.set_my_commands(settings.commands)
     await bot.delete_webhook(drop_pending_updates=True)
 
-    return AppContext(bot=bot, dispatcher=dp, db=db)
+    return AppContext(bot=bot, dispatcher=dp, db=db, notifier=notifier)

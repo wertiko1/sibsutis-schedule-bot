@@ -13,6 +13,7 @@ ACTION_LABELS: dict[str, str] = {
     "schedule_week": "Неделя",
     "change_group": "Смена группы",
     "cancel_group": "Отмена выбора группы",
+    "toggle_notify": "Переключение уведомлений",
     "message": "Текстовое сообщение",
 }
 

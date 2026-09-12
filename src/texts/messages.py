@@ -70,7 +70,7 @@ GROUP_SELECT = "🎓 <b>Выбери свою группу</b>\n\nВведи н�
 GROUP_SEARCH_RESULTS = "🔍 Результаты поиска <i>«{query}»</i>"
 GROUP_NOT_FOUND = "😕 Ничего не найдено по запросу <i>«{query}»</i>\n\nПопробуй ещё раз:"
 GROUP_SELECTED = "✅ Группа <b>{group}</b> выбрана!"
-GROUP_CURRENT = "Текущая группа: <b>{group}</b>"
+GROUP_CURRENT = "Текущая группа: <b>{group}</b>\nУведомления: <b>{notify_status}</b>"
 GROUP_CHANGED = "✅ Группа изменена на <b>{group}</b>!"
 
 # lesson
@@ -81,6 +81,15 @@ LESSON_DETAIL_SUBGROUP = "👥 {subgroup}"
 LESSON_DETAIL_TEACHER = "👤 {teachers}"
 LESSON_DETAIL_ROOM = "🚪 {room}"
 LESSON_DETAIL_FOOTER = "📅 {day:02d}.{month:02d}.{year} — {wd}  ·  🎓 <b>{group}</b>"
+
+# notifications
+NOTIFY_HEADER = "🔔 <b>Изменения в расписании</b>\n🎓 Группа <b>{group}</b>"
+NOTIFY_DAY = "\n📅 <b>{day:02d}.{month:02d}</b> — {wd}"
+NOTIFY_ADDED = "  ➕ {time} {name}"
+NOTIFY_REMOVED = "  ➖ <s>{time} {name}</s>"
+NOTIFY_CHANGED = "  ✏️ {time} {name}"
+NOTIFY_ENABLED = "✅ Уведомления включены"
+NOTIFY_DISABLED = "❌ Уведомления отключены"
 
 # stats — hub
 STATS_HUB_HEADER = "📊 <b>Статистика</b>"
