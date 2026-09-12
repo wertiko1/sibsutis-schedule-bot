@@ -40,7 +40,8 @@ jobs:
         run: |
           set -euo pipefail
           cd ${{ secrets.PROJECT_DIR }}
-          git pull origin main
+          git fetch origin main
+          git reset --hard origin/main
           docker compose pull bot migrations
           docker compose down migrations
           docker compose up -d bot
