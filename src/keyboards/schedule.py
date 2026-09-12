@@ -113,8 +113,17 @@ def lesson_detail_keyboard(day: int, month: int) -> InlineKeyboardMarkup:
     return builder.as_markup()
 
 
-def week_keyboard(prev_cb: str, next_cb: str) -> InlineKeyboardMarkup:
+def week_keyboard(
+    day_labels: list[str],
+    day_callbacks: list[str],
+    prev_cb: str,
+    next_cb: str,
+) -> InlineKeyboardMarkup:
     builder = InlineKeyboardBuilder()
+
+    for label, cb in zip(day_labels, day_callbacks):
+        builder.row(InlineKeyboardButton(text=label, callback_data=cb))
+
     builder.row(
         InlineKeyboardButton(text=buttons.BTN_PREV, callback_data=prev_cb),
         InlineKeyboardButton(text=buttons.BTN_NEXT, callback_data=next_cb),

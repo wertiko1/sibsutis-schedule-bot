@@ -6,7 +6,7 @@ from aiogram.types import CallbackQuery, Message
 
 from keyboards.schedule import week_keyboard
 from models import User
-from services.formatter import format_week
+from services.formatter import day_button_label, format_week
 from sibsutis_schedule import DaySchedule
 
 from . import service, today
@@ -27,26 +27,36 @@ async def _get_week_days(group: str, monday: date) -> list[DaySchedule]:
     return days
 
 
-def _week_callback(monday: date, direction: str) -> str:
+def _nav_callback(monday: date, direction: str) -> str:
     offset = timedelta(weeks=-1) if direction == "prev" else timedelta(weeks=1)
     target = monday + offset
     return f"week_{target.month}_{target.day}"
 
 
+def _build_day_buttons(days: list[DaySchedule]) -> tuple[list[str], list[str]]:
+    labels = []
+    callbacks = []
+    for day in days:
+        prefix = f"{day.day:02d}.{day.month:02d}"
+        labels.append(day_button_label(day, prefix))
+        callbacks.append(f"day_{day.month}_{day.day}")
+    return labels, callbacks
+
+
 async def _send_week(target: Message, group: str, group_name: str, monday: date) -> None:
     days = await _get_week_days(group, monday)
     text = format_week(days, group_name)
-    prev_cb = _week_callback(monday, "prev")
-    next_cb = _week_callback(monday, "next")
-    await target.answer(text, reply_markup=week_keyboard(prev_cb, next_cb))
+    labels, callbacks = _build_day_buttons(days)
+    kb = week_keyboard(labels, callbacks, _nav_callback(monday, "prev"), _nav_callback(monday, "next"))
+    await target.answer(text, reply_markup=kb)
 
 
 async def _edit_week(message: Message, group: str, group_name: str, monday: date) -> None:
     days = await _get_week_days(group, monday)
     text = format_week(days, group_name)
-    prev_cb = _week_callback(monday, "prev")
-    next_cb = _week_callback(monday, "next")
-    await message.edit_text(text, reply_markup=week_keyboard(prev_cb, next_cb))
+    labels, callbacks = _build_day_buttons(days)
+    kb = week_keyboard(labels, callbacks, _nav_callback(monday, "prev"), _nav_callback(monday, "next"))
+    await message.edit_text(text, reply_markup=kb)
 
 
 @router.message(Command("week"))
