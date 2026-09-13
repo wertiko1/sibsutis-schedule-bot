@@ -7,7 +7,7 @@ class Lesson(BaseModel):
     discipline: str
     lesson_type: str
     teachers: list[str]
-    classroom: str
+    classroom: str | None = None
     subgroup: str | None = None
     weekday: str
 
