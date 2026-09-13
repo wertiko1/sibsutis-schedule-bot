@@ -69,31 +69,54 @@ def extract_fact_days(html: str) -> dict[int, dict[str, Any]]:
     return result
 
 
+_SLOT_END: dict[str, str] = {
+    "08:00": "09:35",
+    "09:50": "11:25",
+    "11:40": "13:15",
+    "13:45": "15:20",
+    "15:35": "17:10",
+    "17:25": "19:00",
+    "19:15": "20:50",
+}
+
+
+def _make_lesson(sg: dict[str, Any], time_begin: str, time_end: str) -> Lesson:
+    return Lesson(
+        time_begin=time_begin,
+        time_end=time_end,
+        discipline=sg.get("DISCIPLINE", ""),
+        lesson_type=sg.get("TYPE_LESSON", ""),
+        teachers=sg.get("TEACHER", []),
+        classroom=sg.get("CLASSROOM", ""),
+        subgroup=sg.get("SUBGROUP"),
+        weekday=sg.get("WEEK_DAY", ""),
+    )
+
+
 def parse_lessons(day_data: dict[str, Any]) -> list[Lesson]:
-    """Parse a single day's JSON data into a list of Lesson models"""
+    """Parse a single day's JSON data into a list of Lesson models
+
+    Handles both plan format (cells are dicts with DateBegin/DateEnd/Subgroup)
+    and fact format (cells are lists of lesson dicts with DATE_BEGIN).
+    """
     lessons: list[Lesson] = []
 
     for cell in day_data.get("ScheduleCell", []):
-        if not isinstance(cell, dict):
-            continue
+        if isinstance(cell, dict):
+            subgroups: list[dict[str, Any]] = cell.get("Subgroup", [])
+            if not subgroups:
+                continue
+            time_begin = cell.get("DateBegin", "")[11:16]
+            time_end = cell.get("DateEnd", "")[11:16]
+            for sg in subgroups:
+                lessons.append(_make_lesson(sg, time_begin, time_end))
 
-        subgroups: list[dict[str, Any]] = cell.get("Subgroup", [])
-        if not subgroups:
-            continue
-
-        time_begin: str = cell.get("DateBegin", "")[11:16]
-        time_end: str = cell.get("DateEnd", "")[11:16]
-
-        for sg in subgroups:
-            lessons.append(Lesson(
-                time_begin=time_begin,
-                time_end=time_end,
-                discipline=sg.get("DISCIPLINE", ""),
-                lesson_type=sg.get("TYPE_LESSON", ""),
-                teachers=sg.get("TEACHER", []),
-                classroom=sg.get("CLASSROOM", ""),
-                subgroup=sg.get("SUBGROUP"),
-                weekday=sg.get("WEEK_DAY", ""),
-            ))
+        elif isinstance(cell, list):
+            for sg in cell:
+                if not isinstance(sg, dict):
+                    continue
+                time_begin = sg.get("DATE_BEGIN", "")[11:16]
+                time_end = _SLOT_END.get(time_begin, "")
+                lessons.append(_make_lesson(sg, time_begin, time_end))
 
     return lessons

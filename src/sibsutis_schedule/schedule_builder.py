@@ -38,8 +38,7 @@ def _build_day(
         if fact_data.get("ScheduleCell"):
             lessons = parse_lessons(fact_data)
             logger.debug("Day %d: using fact schedule (%d lessons)", day_num, len(lessons))
-
-    if not lessons:
+    else:
         plan_key: int = _resolve_plan_key(day_date, is_odd_week)
         if plan_key in plan_days:
             lessons = parse_lessons(plan_days[plan_key])
