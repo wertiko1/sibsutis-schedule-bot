@@ -1,7 +1,7 @@
 from datetime import datetime, timedelta
 
-from models.stats import ActionsStats, ActivityStats, AudienceStats, HubStats
-from services.stats_service import _day_start, _monday_of
+from schemas.stats import ActionsStats, ActivityStats, AudienceStats, HubStats
+from services.stats_service import _monday_of
 from texts import common, messages
 
 

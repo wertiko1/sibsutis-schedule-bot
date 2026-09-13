@@ -1,4 +1,4 @@
-from services.schedule_diff import DayDiff
+from schemas.diff import DayDiff
 from texts import common, messages
 
 

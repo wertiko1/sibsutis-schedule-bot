@@ -4,10 +4,9 @@ from tortoise.functions import Count
 
 from config.stats import ACTION_LABELS, IGNORED_ACTIONS, PREFIX_LABELS
 from models import Event, User
-from models.stats import (
+from schemas.stats import (
     ActionsStats, ActivityStats, AudienceStats, HubStats, PeriodDetail,
 )
-
 
 WEEKDAY_NAMES = ["Пн", "Вт", "Ср", "Чт", "Пт", "Сб", "Вс"]
 
@@ -20,7 +19,7 @@ def _monday_of(dt: datetime) -> datetime:
     return _day_start(dt) - timedelta(days=dt.weekday())
 
 
-# ── query helpers ──
+# query helpers
 
 async def _active_count(since: datetime, until: datetime | None = None) -> int:
     qs = Event.filter(created_at__gte=since)
@@ -57,7 +56,7 @@ async def _active_user_ids(since: datetime, until: datetime | None = None) -> se
     return set(rows)
 
 
-# ── queries ──
+# queries
 
 async def get_hub_stats(now: datetime) -> HubStats:
     today_start = _day_start(now)
