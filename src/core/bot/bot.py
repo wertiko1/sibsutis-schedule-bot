@@ -5,11 +5,13 @@ from aiogram.fsm.storage.memory import MemoryStorage
 from config import settings
 from core.app_context import AppContext
 from core.loader import RouterLoader
+from core.logging import Logger
 from core.middleware import AnalyticsMiddleware, UserMiddleware
 from db import PostgresClient
 
 
 async def setup_bot() -> AppContext:
+    Logger()
     bot = Bot(
         token=settings.bot.TOKEN,
         default=DefaultBotProperties(parse_mode="HTML"),

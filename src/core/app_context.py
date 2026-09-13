@@ -1,14 +1,9 @@
-from __future__ import annotations
-
 from dataclasses import dataclass, field
-from typing import TYPE_CHECKING
 
 from aiogram import Bot, Dispatcher
 
 from db import PostgresClient
-
-if TYPE_CHECKING:
-    from services.notification_service import NotificationService
+from services.notification_service import NotificationService
 
 
 @dataclass
