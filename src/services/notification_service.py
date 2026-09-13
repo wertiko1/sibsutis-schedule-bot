@@ -7,48 +7,13 @@ from loguru import logger
 
 from keyboards.group import notification_keyboard
 from models import User
-from services.schedule_diff import DayDiff, diff_days
+from services.formatter.notification import format_notification
+from services.schedule_diff import diff_days
 from services.schedule_service import ScheduleService
 from sibsutis_schedule import DaySchedule
-from texts import common, messages
 
 CHECK_INTERVAL_SECONDS = 5 * 60  # 5 minutes
 LOOKAHEAD_DAYS = 7
-
-
-def _format_notification(group_name: str, diffs: list[DayDiff]) -> str:
-    lines = [messages.NOTIFY_HEADER.format(group=group_name)]
-
-    for diff in diffs:
-        wd = common.WEEKDAYS_SHORT.get(diff.day.weekday, diff.day.weekday)
-        lines.append(messages.NOTIFY_DAY.format(day=diff.day.day, month=diff.day.month, wd=wd))
-
-        for lesson in diff.removed:
-            lines.append(messages.NOTIFY_REMOVED.format(
-                time=f"{lesson.time_begin}–{lesson.time_end}",
-                name=lesson.discipline,
-            ))
-        for lesson in diff.added:
-            lines.append(messages.NOTIFY_ADDED.format(
-                time=f"{lesson.time_begin}–{lesson.time_end}",
-                name=lesson.discipline,
-            ))
-        for old_l, new_l in diff.changed:
-            parts = []
-            if old_l.discipline != new_l.discipline:
-                parts.append(f"{old_l.discipline} → {new_l.discipline}")
-            else:
-                parts.append(new_l.discipline)
-            if old_l.classroom != new_l.classroom:
-                parts.append(f"ауд. {old_l.classroom} → {new_l.classroom}")
-            if old_l.teachers != new_l.teachers:
-                parts.append("сменился преподаватель")
-            lines.append(messages.NOTIFY_CHANGED.format(
-                time=f"{new_l.time_begin}–{new_l.time_end}",
-                name=" · ".join(parts),
-            ))
-
-    return "\n".join(lines)
 
 
 async def _fetch_upcoming_days(
@@ -126,8 +91,8 @@ class NotificationService:
             except Exception:
                 logger.warning("Check failed for group={}", group_id)
 
-    async def _notify_group(self, group_id: str, group_name: str, diffs: list[DayDiff]) -> None:
-        text = _format_notification(group_name, diffs)
+    async def _notify_group(self, group_id: str, group_name: str, diffs: list) -> None:
+        text = format_notification(group_name, diffs)
         kb = notification_keyboard()
 
         users = await User.filter(group_id=group_id, notify=True).values_list("user_id", flat=True)

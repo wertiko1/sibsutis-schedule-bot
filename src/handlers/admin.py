@@ -6,10 +6,8 @@ from aiogram.types import CallbackQuery, Message
 
 from config import settings
 from keyboards.stats import stats_hub_keyboard, stats_back_keyboard
-from services.stats_service import (
-    get_hub_stats, get_activity_stats, get_actions_stats, get_audience_stats,
-    format_hub, format_activity, format_actions, format_audience,
-)
+from services.formatter.stats import format_hub, format_activity, format_actions, format_audience
+from services.stats_service import get_hub_stats, get_activity_stats, get_actions_stats, get_audience_stats
 from .deps import NOVO_TZ
 
 router = Router()
