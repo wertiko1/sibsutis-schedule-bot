@@ -24,6 +24,7 @@ class PeriodDetail:
 class ActivityStats:
     today: PeriodDetail
     week: PeriodDetail
+    total_events: int
     top_weekday: str | None
     top_weekday_pct: float
 

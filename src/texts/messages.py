@@ -103,6 +103,7 @@ STATS_ACT_TODAY = "☀️ <b>Сегодня</b> ({wd}, {date})\nАктивных
 STATS_ACT_WEEK = "📅 <b>Неделя</b> ({start}–{end})\nАктивных: <b>{active}</b> · Событий: <b>{events}</b>"
 STATS_ACT_TREND = "Тренд: <b>{arrow}{pct}%</b> vs {vs}"
 STATS_ACT_TREND_NA = "Тренд: —"
+STATS_ACT_TOTAL = "Всего действий: <b>{total}</b>"
 STATS_ACT_TOP_DAY = "📊 <b>Самый активный день</b>\n{wd} — {pct}% событий"
 
 # stats — actions

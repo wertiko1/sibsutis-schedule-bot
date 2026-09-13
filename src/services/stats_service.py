@@ -114,9 +114,12 @@ async def get_activity_stats(now: datetime) -> ActivityStats:
         top_wd = WEEKDAY_NAMES[dow_idx] if 0 <= dow_idx < 7 else None
         top_wd_pct = round(top["cnt"] / total * 100, 1) if total else 0
 
+    total_events = await Event.all().count()
+
     return ActivityStats(
         today=PeriodDetail(active=today_active, events=today_events, trend_pct=today_trend),
         week=PeriodDetail(active=week_active, events=week_events, trend_pct=week_trend),
+        total_events=total_events,
         top_weekday=top_wd, top_weekday_pct=top_wd_pct,
     )
 

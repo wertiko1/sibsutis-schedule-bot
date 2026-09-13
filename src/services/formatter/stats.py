@@ -54,6 +54,9 @@ def format_activity(data: ActivityStats, now: datetime) -> str:
         _format_trend(data.week.trend_pct, "прошлая неделя"),
     ]
 
+    lines.append("")
+    lines.append(messages.STATS_ACT_TOTAL.format(total=data.total_events))
+
     if data.top_weekday:
         lines.append("")
         lines.append(messages.STATS_ACT_TOP_DAY.format(wd=data.top_weekday, pct=data.top_weekday_pct))
