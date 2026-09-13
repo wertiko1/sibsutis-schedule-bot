@@ -12,7 +12,7 @@ from services.schedule_service import ScheduleService
 from sibsutis_schedule import DaySchedule
 from texts import common, messages
 
-CHECK_INTERVAL_SECONDS = 30 * 60  # 30 minutes
+CHECK_INTERVAL_SECONDS = 5 * 60  # 5 minutes
 LOOKAHEAD_DAYS = 7
 
 
@@ -51,12 +51,16 @@ def _format_notification(group_name: str, diffs: list[DayDiff]) -> str:
     return "\n".join(lines)
 
 
-async def _get_upcoming_days(
+async def _fetch_upcoming_days(
         schedule_service: ScheduleService, group: str, today_: date,
 ) -> list[DaySchedule]:
     days: list[DaySchedule] = []
+    fetched_months: set[int] = set()
     for offset in range(LOOKAHEAD_DAYS):
         d = today_ + timedelta(days=offset)
+        if d.month not in fetched_months:
+            await schedule_service.fetch_month(group, d.month)
+            fetched_months.add(d.month)
         schedule = await schedule_service.get_month(group, d.month)
         days.append(schedule.days[d.day - 1])
     return days
@@ -95,7 +99,7 @@ class NotificationService:
         today_ = today()
         for group_id in groups:
             try:
-                days = await _get_upcoming_days(self._schedule, group_id, today_)
+                days = await _fetch_upcoming_days(self._schedule, group_id, today_)
                 self._snapshots[group_id] = days
             except Exception:
                 logger.warning("Snapshot failed for group={}", group_id)
@@ -107,7 +111,7 @@ class NotificationService:
 
         for group_id, group_name in groups.items():
             try:
-                new_days = await _get_upcoming_days(self._schedule, group_id, today_)
+                new_days = await _fetch_upcoming_days(self._schedule, group_id, today_)
                 old_days = self._snapshots.get(group_id)
 
                 if old_days is None:

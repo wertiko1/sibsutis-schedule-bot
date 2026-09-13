@@ -30,7 +30,6 @@ async def setup_bot() -> AppContext:
 
     from handlers.deps import service
     from services.notification_service import NotificationService
-    service.start_background_refresh()
 
     notifier = NotificationService(bot, service)
     notifier.start()
