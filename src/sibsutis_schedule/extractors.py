@@ -87,7 +87,7 @@ def _make_lesson(sg: dict[str, Any], time_begin: str, time_end: str) -> Lesson:
         discipline=sg.get("DISCIPLINE", ""),
         lesson_type=sg.get("TYPE_LESSON", ""),
         teachers=sg.get("TEACHER", []),
-        classroom=sg.get("CLASSROOM", ""),
+        classroom=sg.get("CLASSROOM"),
         subgroup=sg.get("SUBGROUP"),
         weekday=sg.get("WEEK_DAY", ""),
     )
