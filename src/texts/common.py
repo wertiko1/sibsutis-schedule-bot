@@ -40,3 +40,5 @@ TIME_HOURS_MINUTES = "{h} ч {m} мин"
 
 TODAY = "Сегодня"
 TOMORROW = "Завтра"
+
+NOTIFY_STATUS = {True: "включены 🔔", False: "отключены 🔕"}

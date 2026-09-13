@@ -70,7 +70,7 @@ GROUP_SELECT = "🎓 <b>Выбери свою группу</b>\n\nВведи н�
 GROUP_SEARCH_RESULTS = "🔍 Результаты поиска <i>«{query}»</i>"
 GROUP_NOT_FOUND = "😕 Ничего не найдено по запросу <i>«{query}»</i>\n\nПопробуй ещё раз:"
 GROUP_SELECTED = "✅ Группа <b>{group}</b> выбрана!"
-GROUP_CURRENT = "Текущая группа: <b>{group}</b>\nУведомления: <b>{notify_status}</b>"
+GROUP_CURRENT = "Текущая группа: <b>{group}</b>\n\nУведомления об изменениях в расписании (beta): <b>{notify_status}</b>"
 GROUP_CHANGED = "✅ Группа изменена на <b>{group}</b>!"
 
 # lesson

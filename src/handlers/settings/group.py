@@ -6,8 +6,8 @@ from keyboards.group import cancel_keyboard, group_results_keyboard, onboarding_
 from keyboards.schedule import back_to_main
 from models import User
 from states import GroupStates
-from texts import messages
-from .deps import service
+from texts import common, messages
+from handlers.deps import service
 
 router = Router()
 
@@ -27,8 +27,11 @@ async def cb_cancel_group(call: CallbackQuery, state: FSMContext, user: User) ->
     await state.clear()
     if user.group_id:
         await call.message.edit_text(
-            messages.GROUP_CURRENT.format(group=user.group_name),
-            reply_markup=settings_keyboard(),
+            messages.GROUP_CURRENT.format(
+                group=user.group_name,
+                notify_status=common.NOTIFY_STATUS[user.notify],
+            ),
+            reply_markup=settings_keyboard(user.notify),
         )
     else:
         await call.message.edit_text(
