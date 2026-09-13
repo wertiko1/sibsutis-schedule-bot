@@ -13,6 +13,10 @@ from . import service, today
 router = Router()
 
 
+def _monday_of(d: date) -> date:
+    return d - timedelta(days=d.weekday())
+
+
 def _slot_labels(day_schedule) -> list[str]:
     slots = group_lessons(day_schedule.lessons)
     return [slot_button_label(slot) for slot in slots]
@@ -22,21 +26,25 @@ async def _get_day(group: str, d: date):
     schedule = await service.get_month(group, d.month)
     day_schedule = schedule.days[d.day - 1]
     max_day = len(schedule.days)
-    return day_schedule, max_day
+    return day_schedule, max_day, schedule.year
+
+
+def _day_kb(day_schedule, d: date, max_day: int, year: int):
+    labels = _slot_labels(day_schedule)
+    monday = _monday_of(date(year, d.month, d.day))
+    return day_keyboard(d.day, d.month, max_day, labels, monday.month, monday.day)
 
 
 async def _send_day(target: Message, group: str, group_name: str, d: date) -> None:
-    day_schedule, max_day = await _get_day(group, d)
+    day_schedule, max_day, year = await _get_day(group, d)
     text = format_day_header(day_schedule, group_name)
-    labels = _slot_labels(day_schedule)
-    await target.answer(text, reply_markup=day_keyboard(d.day, d.month, max_day, labels))
+    await target.answer(text, reply_markup=_day_kb(day_schedule, d, max_day, year))
 
 
 async def _edit_day(message: Message, group: str, group_name: str, d: date) -> None:
-    day_schedule, max_day = await _get_day(group, d)
+    day_schedule, max_day, year = await _get_day(group, d)
     text = format_day_header(day_schedule, group_name)
-    labels = _slot_labels(day_schedule)
-    await message.edit_text(text, reply_markup=day_keyboard(d.day, d.month, max_day, labels))
+    await message.edit_text(text, reply_markup=_day_kb(day_schedule, d, max_day, year))
 
 
 @router.message(Command("today"))
@@ -70,10 +78,9 @@ async def cb_day(call: CallbackQuery, user: User) -> None:
     schedule = await service.get_month(user.group_id, month)
     day_schedule = schedule.days[day - 1]
     text = format_day_header(day_schedule, user.group_name)
-    labels = _slot_labels(day_schedule)
-    max_day = len(schedule.days)
+    d = date(schedule.year, month, day)
 
-    await call.message.edit_text(text, reply_markup=day_keyboard(day, month, max_day, labels))
+    await call.message.edit_text(text, reply_markup=_day_kb(day_schedule, d, len(schedule.days), schedule.year))
     await call.answer()
 
 

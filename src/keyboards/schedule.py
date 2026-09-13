@@ -72,7 +72,7 @@ def month_overview_keyboard(
     return builder.as_markup()
 
 
-def day_keyboard(day: int, month: int, max_day: int, lesson_labels: list[str]) -> InlineKeyboardMarkup:
+def day_keyboard(day: int, month: int, max_day: int, lesson_labels: list[str], monday_month: int, monday_day: int) -> InlineKeyboardMarkup:
     builder = InlineKeyboardBuilder()
 
     for i, label in enumerate(lesson_labels):
@@ -86,7 +86,7 @@ def day_keyboard(day: int, month: int, max_day: int, lesson_labels: list[str]) -
         nav.append(InlineKeyboardButton(text=buttons.BTN_NEXT, callback_data=f"day_{month}_{day + 1}"))
     builder.row(*nav)
 
-    builder.row(InlineKeyboardButton(text=buttons.BTN_TO_MONTH, callback_data=f"month_{month}"))
+    builder.row(InlineKeyboardButton(text=buttons.BTN_TO_WEEK, callback_data=f"week_{monday_month}_{monday_day}"))
     builder.row(InlineKeyboardButton(text=buttons.BTN_MENU, callback_data="back_main"))
     return builder.as_markup()
 
