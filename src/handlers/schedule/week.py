@@ -98,8 +98,9 @@ async def cb_week_day(call: CallbackQuery, user: User) -> None:
     slots = group_lessons(day_schedule.lessons)
     labels = [slot_button_label(slot) for slot in slots]
     max_day = len(schedule.days)
+    monday = _monday_of(date(schedule.year, month, day))
 
-    await call.message.edit_text(text, reply_markup=week_day_keyboard(day, month, max_day, labels))
+    await call.message.edit_text(text, reply_markup=week_day_keyboard(day, month, max_day, labels, monday.month, monday.day))
     await call.answer()
 
 
@@ -115,6 +116,7 @@ async def cb_week_lesson(call: CallbackQuery, user: User) -> None:
     slots = group_lessons(day_schedule.lessons)
     slot = slots[idx]
     text = format_slot_detail(slot, day_schedule, user.group_name)
+    monday = _monday_of(date(schedule.year, month, day))
 
-    await call.message.edit_text(text, reply_markup=week_lesson_detail_keyboard(day, month))
+    await call.message.edit_text(text, reply_markup=week_lesson_detail_keyboard(day, month, monday.month, monday.day))
     await call.answer()
