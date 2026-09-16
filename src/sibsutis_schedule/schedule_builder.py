@@ -19,6 +19,22 @@ def _resolve_plan_key(day_date: date, is_odd_week: bool) -> int:
     return dow
 
 
+def _is_in_project_period(lesson: Lesson, day_date: date) -> bool:
+    """Check if a plan lesson should be skipped due to PROJECT_DATES"""
+    for period in lesson.project_dates:
+        try:
+            parts_s = period.start_date.split("-")
+            parts_e = period.end_date.split("-")
+            if len(parts_s) == 3 and len(parts_e) == 3:
+                start = date(int(parts_s[2]), int(parts_s[1]), int(parts_s[0]))
+                end = date(int(parts_e[2]), int(parts_e[1]), int(parts_e[0]))
+                if start <= day_date <= end:
+                    return True
+        except (ValueError, IndexError):
+            continue
+    return False
+
+
 def _build_day(
         day_num: int,
         year: int,
@@ -27,22 +43,42 @@ def _build_day(
         fact_days: dict[int, dict[str, Any]],
         is_odd_week: bool,
 ) -> DaySchedule:
-    """Build a DaySchedule for a single calendar day, preferring fact over plan data"""
+    """Build a DaySchedule by merging plan and fact data (matching website logic).
+
+    1. Start with plan lessons, filtering out PROJECT_DATES entries
+    2. For time slots present in fact: replace plan lessons with fact
+    3. For time slots only in fact: add them
+    """
     day_date: date = date(year, month, day_num)
     weekday_name: str = WEEKDAYS_RU[day_date.weekday()]
 
-    lessons: list[Lesson] = []
+    # Collect plan lessons keyed by time_begin
+    by_time: dict[str, list[Lesson]] = {}
+    plan_key: int = _resolve_plan_key(day_date, is_odd_week)
+    if plan_key in plan_days:
+        for lesson in parse_lessons(plan_days[plan_key]):
+            if _is_in_project_period(lesson, day_date):
+                continue
+            by_time.setdefault(lesson.time_begin, []).append(lesson)
 
-    if day_num in fact_days:
-        fact_data: dict[str, Any] = fact_days[day_num]
-        if fact_data.get("ScheduleCell"):
-            lessons = parse_lessons(fact_data)
-            logger.debug("Day %d: using fact schedule (%d lessons)", day_num, len(lessons))
-    else:
-        plan_key: int = _resolve_plan_key(day_date, is_odd_week)
-        if plan_key in plan_days:
-            lessons = parse_lessons(plan_days[plan_key])
-            logger.debug("Day %d: using plan[%d] (%d lessons)", day_num, plan_key, len(lessons))
+    # Merge fact: replace or add by time slot
+    fact_data: dict[str, Any] | None = fact_days.get(day_num)
+    if fact_data and fact_data.get("ScheduleCell"):
+        fact_lessons = parse_lessons(fact_data)
+        fact_by_time: dict[str, list[Lesson]] = {}
+        for lesson in fact_lessons:
+            fact_by_time.setdefault(lesson.time_begin, []).append(lesson)
+
+        for time_key, lessons in fact_by_time.items():
+            by_time[time_key] = lessons
+
+    # Flatten and sort by time
+    lessons: list[Lesson] = []
+    for time_key in sorted(by_time.keys()):
+        lessons.extend(by_time[time_key])
+
+    logger.debug("Day %d: %d lessons (plan_key=%d, has_fact=%s)", day_num, len(lessons), plan_key,
+                 day_num in fact_days)
 
     for lesson in lessons:
         lesson.weekday = weekday_name

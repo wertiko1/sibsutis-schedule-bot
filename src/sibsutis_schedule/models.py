@@ -1,6 +1,11 @@
 from pydantic import BaseModel
 
 
+class ProjectDateRange(BaseModel):
+    start_date: str
+    end_date: str
+
+
 class Lesson(BaseModel):
     time_begin: str
     time_end: str
@@ -10,6 +15,7 @@ class Lesson(BaseModel):
     classroom: str | None = None
     subgroup: str | None = None
     weekday: str
+    project_dates: list[ProjectDateRange] = []
 
 
 class DaySchedule(BaseModel):

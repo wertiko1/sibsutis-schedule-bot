@@ -3,7 +3,7 @@ import logging
 import re
 from typing import Any
 
-from .models import Lesson
+from .models import Lesson, ProjectDateRange
 
 logger: logging.Logger = logging.getLogger(__name__)
 
@@ -80,6 +80,18 @@ _SLOT_END: dict[str, str] = {
 }
 
 
+def _parse_project_dates(raw: list[dict[str, Any]] | None) -> list[ProjectDateRange]:
+    if not raw:
+        return []
+    result: list[ProjectDateRange] = []
+    for item in raw:
+        start = item.get("START_DATE", "")
+        end = item.get("END_DATE", "")
+        if start and end:
+            result.append(ProjectDateRange(start_date=start, end_date=end))
+    return result
+
+
 def _make_lesson(sg: dict[str, Any], time_begin: str, time_end: str) -> Lesson:
     return Lesson(
         time_begin=time_begin,
@@ -90,6 +102,7 @@ def _make_lesson(sg: dict[str, Any], time_begin: str, time_end: str) -> Lesson:
         classroom=sg.get("CLASSROOM"),
         subgroup=sg.get("SUBGROUP"),
         weekday=sg.get("WEEK_DAY", ""),
+        project_dates=_parse_project_dates(sg.get("PROJECT_DATES")),
     )
 
 
