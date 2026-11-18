@@ -1,4 +1,7 @@
+from datetime import date
+
 from sibsutis_schedule import DaySchedule
+from sibsutis_schedule.week_parity import academic_week_number, academic_week_parity
 
 from texts import common, messages
 
@@ -7,7 +10,16 @@ from ._helpers import group_lessons, lesson_word
 
 def format_day_header(day: DaySchedule, group: str) -> str:
     wd = common.WEEKDAYS_SHORT.get(day.weekday, day.weekday)
-    header = messages.DAY_HEADER.format(day=day.day, month=day.month, year=day.year, wd=wd, group=group)
+    day_date = date(day.year, day.month, day.day)
+    header = messages.DAY_HEADER.format(
+        day=day.day,
+        month=day.month,
+        year=day.year,
+        wd=wd,
+        group=group,
+        week_number=academic_week_number(day_date),
+        week_parity=academic_week_parity(day_date),
+    )
 
     if not day.lessons:
         return f"{header}\n\n{messages.DAY_NO_LESSONS}"

@@ -8,6 +8,7 @@ from keyboards.group import onboarding_keyboard
 from keyboards.schedule import main_menu
 from models import User
 from services.formatter import day_button_label
+from sibsutis_schedule.week_parity import academic_week_number, academic_week_parity
 from texts import common, messages
 from .deps import service, today
 
@@ -29,8 +30,9 @@ async def _build_main_menu(group: str):
 
     today_label = day_button_label(day_today, common.TODAY)
     tomorrow_label = day_button_label(day_tomorrow, common.TOMORROW)
+    week_label = f"{academic_week_number(today_)}-я неделя · {academic_week_parity(today_)}"
 
-    return main_menu(today_label, tomorrow_label)
+    return main_menu(today_label, tomorrow_label, week_label)
 
 
 @router.callback_query(F.data == "back_main")

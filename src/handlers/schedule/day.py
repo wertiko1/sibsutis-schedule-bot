@@ -32,7 +32,10 @@ async def _get_day(group: str, d: date):
 def _day_kb(day_schedule, d: date, max_day: int, year: int):
     labels = _slot_labels(day_schedule)
     monday = _monday_of(date(year, d.month, d.day))
-    return day_keyboard(d.day, d.month, max_day, labels, monday.month, monday.day)
+    return day_keyboard(
+        d.day, d.month, max_day, labels, monday.month, monday.day,
+        show_today=date(year, d.month, d.day) != today(),
+    )
 
 
 async def _send_day(target: Message, group: str, group_name: str, d: date) -> None:
@@ -97,5 +100,9 @@ async def cb_lesson(call: CallbackQuery, user: User) -> None:
     slot = slots[idx]
     text = format_slot_detail(slot, day_schedule, user.group_name)
 
-    await call.message.edit_text(text, reply_markup=lesson_detail_keyboard(day, month))
+    viewed_date = date(schedule.year, month, day)
+    await call.message.edit_text(
+        text,
+        reply_markup=lesson_detail_keyboard(day, month, show_today=viewed_date != today()),
+    )
     await call.answer()
