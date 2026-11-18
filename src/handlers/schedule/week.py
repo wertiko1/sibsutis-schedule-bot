@@ -47,7 +47,10 @@ async def _send_week(target: Message, group: str, group_name: str, monday: date)
     days = await _get_week_days(group, monday)
     text = format_week(days, group_name)
     labels, callbacks = _build_day_buttons(days)
-    kb = week_keyboard(labels, callbacks, _nav_callback(monday, "prev"), _nav_callback(monday, "next"))
+    kb = week_keyboard(
+        labels, callbacks, _nav_callback(monday, "prev"), _nav_callback(monday, "next"),
+        show_today=monday != _monday_of(today()),
+    )
     await target.answer(text, reply_markup=kb)
 
 
@@ -55,7 +58,10 @@ async def _edit_week(message: Message, group: str, group_name: str, monday: date
     days = await _get_week_days(group, monday)
     text = format_week(days, group_name)
     labels, callbacks = _build_day_buttons(days)
-    kb = week_keyboard(labels, callbacks, _nav_callback(monday, "prev"), _nav_callback(monday, "next"))
+    kb = week_keyboard(
+        labels, callbacks, _nav_callback(monday, "prev"), _nav_callback(monday, "next"),
+        show_today=monday != _monday_of(today()),
+    )
     await message.edit_text(text, reply_markup=kb)
 
 
@@ -100,7 +106,14 @@ async def cb_week_day(call: CallbackQuery, user: User) -> None:
     max_day = len(schedule.days)
     monday = _monday_of(date(schedule.year, month, day))
 
-    await call.message.edit_text(text, reply_markup=week_day_keyboard(day, month, max_day, labels, monday.month, monday.day))
+    viewed_date = date(schedule.year, month, day)
+    await call.message.edit_text(
+        text,
+        reply_markup=week_day_keyboard(
+            day, month, max_day, labels, monday.month, monday.day,
+            show_today=viewed_date != today(),
+        ),
+    )
     await call.answer()
 
 
@@ -118,5 +131,12 @@ async def cb_week_lesson(call: CallbackQuery, user: User) -> None:
     text = format_slot_detail(slot, day_schedule, user.group_name)
     monday = _monday_of(date(schedule.year, month, day))
 
-    await call.message.edit_text(text, reply_markup=week_lesson_detail_keyboard(day, month, monday.month, monday.day))
+    viewed_date = date(schedule.year, month, day)
+    await call.message.edit_text(
+        text,
+        reply_markup=week_lesson_detail_keyboard(
+            day, month, monday.month, monday.day,
+            show_today=viewed_date != today(),
+        ),
+    )
     await call.answer()

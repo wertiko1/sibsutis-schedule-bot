@@ -1,4 +1,16 @@
-from datetime import date
+from datetime import date, timedelta
+
+
+def academic_week_number(d: date) -> int:
+    """Return the academic week number, counting from the week containing September 1."""
+    academic_year = d.year if d.month >= 9 else d.year - 1
+    september_first = date(academic_year, 9, 1)
+    first_monday = september_first - timedelta(days=september_first.weekday())
+    return (d - first_monday).days // 7 + 1
+
+
+def academic_week_parity(d: date) -> str:
+    return "нечётная" if academic_week_number(d) % 2 else "чётная"
 
 
 def _python_to_js_dow(d: date) -> int:

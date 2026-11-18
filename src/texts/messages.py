@@ -32,7 +32,11 @@ PICK_MONTH = "Выбери месяц:"
 PICK_DAY = "Выбери день:"
 
 # today
-DAY_HEADER = "📅 <b>{day:02d}.{month:02d}.{year}</b> — {wd}\n🎓 Группа <b>{group}</b>"
+DAY_HEADER = (
+    "📅 <b>{day:02d}.{month:02d}.{year}</b> — {wd}\n"
+    "📚 <b>{week_number}-я учебная неделя</b> · {week_parity}\n"
+    "🎓 Группа <b>{group}</b>"
+)
 DAY_NO_LESSONS = "😴 <i>В этот день занятий нет</i>"
 DAY_SUMMARY = "📊 {count} {word}  ·  {t_start}–{t_end}"
 DAY_BTN_OFF = "{prefix} ({wd}) — выходной 😴"
@@ -57,7 +61,11 @@ NOW_FOCUSED_ONGOING = "🟢 Сейчас идёт · осталось: <b>{time}
 NOW_FOCUSED_FINISHED = "✅ Закончилась"
 
 # week
-WEEK_HEADER = "📋 <b>Неделя</b>  ·  {d_start:02d}.{m_start:02d}–{d_end:02d}.{m_end:02d}\n🎓 Группа <b>{group}</b>"
+WEEK_HEADER = (
+    "📋 <b>{week_number}-я учебная неделя</b> · {week_parity}\n"
+    "📅 {d_start:02d}.{m_start:02d}–{d_end:02d}.{m_end:02d}\n"
+    "🎓 Группа <b>{group}</b>"
+)
 WEEK_DAY = "\n<b>{wd}, {day:02d}.{month:02d}</b>"
 WEEK_NO_LESSONS = "  😴 <i>выходной</i>"
 
